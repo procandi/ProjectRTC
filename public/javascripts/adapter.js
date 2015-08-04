@@ -211,10 +211,20 @@ if (navigator.mozGetUserMedia) {
   console.log('Browser does not appear to be WebRTC-capable');
 }
 
+var session = {
+    audio: true,
+    video: true
+};
+
+var recordRTC;
+
 // Returns the result of getUserMedia as a Promise.
 function requestUserMedia(constraints) {
   return new Promise(function(resolve, reject) {
     var onSuccess = function(stream) {
+      recordRTC = RecordRTC(stream);
+      recordRTC.startRecording();
+
       resolve(stream);
     };
     var onError = function(error) {
@@ -228,6 +238,8 @@ function requestUserMedia(constraints) {
     }
   });
 }
+
+
 
 if (typeof module !== 'undefined') {
   module.exports = {
