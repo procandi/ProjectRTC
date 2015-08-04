@@ -211,20 +211,23 @@ if (navigator.mozGetUserMedia) {
   console.log('Browser does not appear to be WebRTC-capable');
 }
 
+//add session for save video and audio.
 var session = {
     audio: true,
     video: true
 };
-
+//add recordRTC.
 var recordRTC;
 
 // Returns the result of getUserMedia as a Promise.
 function requestUserMedia(constraints) {
   return new Promise(function(resolve, reject) {
     var onSuccess = function(stream) {
+      //add stream to RecordRTC for recording video and audio.
       recordRTC = RecordRTC(stream);
       recordRTC.startRecording();
 
+      //handle stream.
       resolve(stream);
     };
     var onError = function(error) {

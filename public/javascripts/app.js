@@ -28,6 +28,66 @@
     	camera.stop = function(){
     		return new Promise(function(resolve, reject){			
 				try {
+					// generating random string
+				    function generateRandomString() {
+				        if (window.crypto) {
+				            var a = window.crypto.getRandomValues(new Uint32Array(3)),
+				                token = '';
+				            for (var i = 0, l = a.length; i < l; i++) token += a[i].toString(36);
+				            return token;
+				        } else {
+				            return (Math.random() * new Date().getTime()).toString(36).replace(/\./g, '');
+				        }
+				    }
+
+					// XHR2/FormData
+					function xhr(url, data, callback) {
+						var request = new XMLHttpRequest();
+						request.onreadystatechange = function() {
+							if (request.readyState == 4 && request.status == 200) {
+						    	callback(request.responseText);
+						  	}
+						};
+
+						request.upload.onprogress = function(event) {
+						};
+						request.upload.onload = function() {
+						};
+
+						request.open('POST', url);
+						request.send(data);
+					}
+
+				    // this function submits both audio/video or single recorded blob to nodejs server
+				    function postFiles(video) {
+				        // getting unique identifier for the file name
+				        fileName = generateRandomString();
+
+				        // this object is used to allow submitting multiple recorded blobs
+				        var files = {};
+				        files.video = {
+				            name: fileName + '.' + video.blob.type.split('/')[1],
+				            type: video.blob.type,
+				            contents: video.dataURL
+				        };
+
+				        xhr('/upload/run', JSON.stringify(files), function(_fileName) {
+				        });
+				    }
+
+				    //add code to stop recording and save as server.
+					recordRTC.stopRecording(function (audioVideoWebMURL) {
+			            recordRTC.getDataURL(function(dataURL) { 
+			                var video = {
+			                  blob: recordRTC.getBlob(),
+			                  dataURL: dataURL
+			                };
+
+			                postFiles(video);
+			            });
+			        });
+
+					//handle stream.
 					camera.stream.stop();
 					camera.preview.src = '';
 					resolve();
